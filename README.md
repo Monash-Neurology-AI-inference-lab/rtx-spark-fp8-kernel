@@ -1,4 +1,6 @@
-# Fused FP8 matmul for vLLM on the NVIDIA RTX Spark (native Windows)
+# Fused FP8 matmul for vLLM on NVIDIA RTX Spark (GB10, sm_121): native Windows
+
+**vLLM on Windows · RTX Spark / GB10 · sm_121 · FP8 · Triton · torch.compile · Gemma 4**
 
 A Triton FP8 matrix-multiply kernel, and a small patch that installs it into vLLM, for the
 [vllm-for-rtx-spark](https://github.com/devjeonghwan/vllm-for-rtx-spark) native Windows ARM64
@@ -12,6 +14,21 @@ same setup under WSL2**, and about 58% faster than the build as shipped.
 Full write-up, results and settings:
 [GB10-class infrastructure for batch research inference](https://www.drmvalente.com.au/blog-rtx-spark-dgx-spark-batch-inference.html#native-windows-vllm)
 (Dr Michael Valente).
+
+## Who this is for
+
+- You run vLLM **natively on Windows** on an **NVIDIA RTX Spark** laptop (GB10-class N1X, compute
+  capability **sm_121**) with vllm-for-rtx-spark, and serve an **FP8** model
+  (for example `RedHatAI/gemma-4-12B-it-FP8-dynamic`).
+- Your logs show vLLM using `ChannelWiseTorchFP8ScaledMMLinearKernel`, or
+  `cutlass_scaled_mm_supports_fp8(121)` returns `False`, or row-wise `torch._scaled_mm` fails with
+  "Rowwise scaling is not currently supported on your device".
+- You serve many requests at once (batch inference), where the FP8 matmuls are a large share of
+  GPU time.
+
+**DGX Spark and WSL2/Linux:** the slow fallback was found in the native Windows build. Standard
+Linux vLLM builds (including under WSL2) use a fused CUTLASS kernel instead, so the gain there is
+likely small. Untested.
 
 ## The problem it fixes
 
@@ -85,6 +102,13 @@ the model's `config.json` for layer shapes.
 - Tested only on the RTX Spark N1X (ASUS ProArt P14) with Gemma 4 12B shapes. Other GPUs or
   shapes may want different tiles; re-run `benchmarks/fp8_triton_kernel.py` to autotune.
 - Not affiliated with NVIDIA, the vLLM project or vllm-for-rtx-spark. Use at your own risk.
+
+## Related
+
+- [vllm-for-rtx-spark](https://github.com/devjeonghwan/vllm-for-rtx-spark): the native Windows vLLM build this patches.
+- [GB10-class infrastructure for batch research inference](https://www.drmvalente.com.au/blog-rtx-spark-dgx-spark-batch-inference.html):
+  full benchmarks, native Windows vs WSL2, ASUS ProArt P14 power-profile tuning, prefix-cache
+  hit rate and recommended vLLM settings for the RTX Spark and DGX Spark.
 
 ## Licence
 
