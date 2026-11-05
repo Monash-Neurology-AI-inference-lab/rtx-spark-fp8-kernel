@@ -1,0 +1,14 @@
+served-model-name: gemma4-12b-fp8dyn
+max-model-len: 8192
+gpu-memory-utilization: 0.20
+kv-cache-memory-bytes: 64424509440
+kv-cache-dtype: fp8
+max-num-batched-tokens: 32768
+max-num-seqs: 1024
+enable-prefix-caching: true
+prefix-caching-hash-algo: xxhash
+async-scheduling: true
+limit-mm-per-prompt: '{"image":0,"audio":0,"video":0}'
+seed: 1234
+host: 127.0.0.1
+port: 8000
